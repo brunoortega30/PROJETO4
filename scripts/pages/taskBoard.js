@@ -25,12 +25,16 @@ function populateBoardsDropdown(boards) {
     boards.forEach((board) => {
         const listItem = document.createElement("li");
         listItem.innerHTML = `<a class="dropdown-item" id="dropdown-item" value="${board.Id}">${board.Name}</a>`;
+        
         listItem.addEventListener("click", (event) => {
             // console.log(board.Id)
             boardTitle.innerHTML = event.target.innerHTML;
+        
             loadBoard(board.Id);
         })
+
         boardsList.appendChild(listItem);
+
     });
 }
 
@@ -41,14 +45,27 @@ async function loadBoard(id) {
             throw new Error("Erro ao carregar colunas");
         }
         const columns = await response.json();
-        populateColumns(columns);
+        populateColumns(columns, id);
     } catch (error) {
         console.error("Erro ao carregar colunas:", error);
     }
 }
 
-function populateColumns(columns) {
+function populateColumns(columns, BoardId) {
     boardLayout.innerHTML = ""; 
+
+    const newColunaButton = document.createElement("div");
+    newColunaButton.className = "coluna-item new-coluna";
+    newColunaButton.innerHTML = `
+        <button class="btn btn-light btn-block w-100 d-block" id="newColunaButton"> + Nova Coluna </button>
+    `;
+    newColunaButton.id = `conteinerNewColunaButton`;
+    newColunaButton.addEventListener("click", () => {
+
+        createNewColumn(BoardId);
+    });
+
+    boardTitle.appendChild(newColunaButton);
 
     columns.forEach((column) => {
         const columnItem = document.createElement("article");
@@ -76,20 +93,9 @@ function populateColumns(columns) {
             createNewCard(column.Id);
         });
 
-        //nova coluna
-        const newColunaButton = document.createElement("div");
-        newColunaButton.className = "coluna-item new-coluna";
-        newColunaButton.innerHTML = `
-            <button class="btn btn-light btn-block w-100 d-block"> + Nova Coluna </button>
-        `;
-        newCardButton.addEventListener("click", () => {
-            createNewColuna(Board.Id);
-        });
-
         // Adiciona os elementos à coluna
         columnBody.appendChild(tasksContainer); // Contêiner de tarefas
         columnBody.appendChild(newCardButton);  // Botão "Novo Card"
-        columnBody.appendChild(newColunaButton);  // Botão "Nova Coluna"
         columnItem.appendChild(columnHeader);
         columnItem.appendChild(columnBody);
         boardLayout.appendChild(columnItem);
@@ -169,12 +175,91 @@ function createNewCard(columnId) {
         // Aqui você pode incluir uma lógica para salvar a tarefa no backend
         saveTask(columnId, title, description);
 
-        saveColuna(columnId, BoardId, Name);
     });
 
     // Event listener para cancelar
     cancelButton.addEventListener("click", () => {
         tasksContainer.removeChild(cardEditor);
+    });
+}
+
+function createNewColumn(BoardId){
+
+    const tasksContainer = document.getElementById(`conteinerNewColunaButton`);
+
+    // Cria os campos de input para o título e descrição
+    const titleInput = document.createElement("input");
+    titleInput.type = "text";
+    titleInput.placeholder = "Título";
+    titleInput.className = "task-input form-control mb-1";
+
+    // Botão para salvar o Coluna
+    const saveButton = document.createElement("button");
+    saveButton.className = "btn btn-success  btn-sm btn-save me-1";
+    saveButton.innerText = "Salvar";
+
+    // Botão para cancelar a criação da Coluna
+    const cancelButton = document.createElement("button");
+    cancelButton.className = "btn btn-danger  btn-sm  btn-cancel";
+    cancelButton.innerText = "Cancelar";
+    // Event listener para cancelar
+    cancelButton.addEventListener("click", () => {
+        tasksContainer.removeChild(cardEditor);
+    });
+
+    // Container para os inputs e botões
+    const cardEditor = document.createElement("div");
+    cardEditor.className = "card-editor";
+    cardEditor.appendChild(titleInput);
+    cardEditor.appendChild(saveButton);
+    cardEditor.appendChild(cancelButton);
+
+    // Adiciona o editor ao container de boards
+    boardTitle.appendChild(cardEditor);
+
+    saveButton.addEventListener("click", () => {
+        const title = titleInput.value.trim();
+        
+        if (title === "") {
+            alert("O título da tarefa não pode estar vazio.");
+            return;
+        }
+
+        saveColumn(BoardId, title)
+
+        const columnItem = document.createElement("article");
+        columnItem.className = "column-item";
+
+        const columnHeader = document.createElement("header");
+        columnHeader.className = "column-header";
+        columnHeader.innerHTML = `<h5>${title}</h5>`;
+
+        // Contêiner principal da coluna
+        const columnBody = document.createElement("div");
+        columnBody.className = "column-body";
+
+        // Botão "Novo Card"
+        const newCardButton = document.createElement("div");
+        newCardButton.className = "task-item new-card";
+        newCardButton.innerHTML = `
+            <button class="btn btn-light btn-block w-100 d-block"> + Nova Tarefa </button>`;
+        newCardButton.addEventListener("click", () => {
+            createNewCard(column.Id);
+        });
+
+        // Adiciona o novo card ao container de tarefas
+        columnBody.appendChild(newCardButton);  // Botão "Novo Card"
+        columnItem.appendChild(columnHeader);
+        columnItem.appendChild(columnBody);
+        boardLayout.appendChild(columnItem);
+
+        // Remove o editor de tarefas
+        boardTitle.removeChild(cardEditor);
+    });
+
+    // Event listener para cancelar
+    cancelButton.addEventListener("click", () => {
+        boardTitle.removeChild(cardEditor);
     });
 }
 
@@ -194,7 +279,7 @@ function saveTask(columnId, title, description) {
     });
 }
 
-function saveColuna(BoardId, Name) {
+function saveColumn(BoardId, Name) {
     // Lógica para salvar a coluna no backend (exemplo)
     fetch(`${API_BASE_URL}/Column`, {
         method: "POST",
@@ -265,8 +350,6 @@ function toggleTheme() {
 
 // Adiciona o evento ao botão
 toggleButton.addEventListener('click', toggleTheme);
-
-
 
 logoutButton.addEventListener("click", () => {
     localStorage.removeItem("user");
