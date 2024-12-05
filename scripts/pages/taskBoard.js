@@ -71,15 +71,25 @@ function populateColumns(columns) {
         const newCardButton = document.createElement("div");
         newCardButton.className = "task-item new-card";
         newCardButton.innerHTML = `
-            <button class="btn btn-light btn-block w-100 d-block"> + Nova Tarefa </button>
-        `;
+            <button class="btn btn-light btn-block w-100 d-block"> + Nova Tarefa </button>`;
         newCardButton.addEventListener("click", () => {
             createNewCard(column.Id);
+        });
+
+        //nova coluna
+        const newColunaButton = document.createElement("div");
+        newColunaButton.className = "coluna-item new-coluna";
+        newColunaButton.innerHTML = `
+            <button class="btn btn-light btn-block w-100 d-block"> + Nova Coluna </button>
+        `;
+        newCardButton.addEventListener("click", () => {
+            createNewColuna(Board.Id);
         });
 
         // Adiciona os elementos à coluna
         columnBody.appendChild(tasksContainer); // Contêiner de tarefas
         columnBody.appendChild(newCardButton);  // Botão "Novo Card"
+        columnBody.appendChild(newColunaButton);  // Botão "Nova Coluna"
         columnItem.appendChild(columnHeader);
         columnItem.appendChild(columnBody);
         boardLayout.appendChild(columnItem);
@@ -158,6 +168,8 @@ function createNewCard(columnId) {
 
         // Aqui você pode incluir uma lógica para salvar a tarefa no backend
         saveTask(columnId, title, description);
+
+        saveColuna(columnId, BoardId, Name);
     });
 
     // Event listener para cancelar
@@ -179,6 +191,22 @@ function saveTask(columnId, title, description) {
     })
     .catch(error => {
         console.error("Erro ao salvar tarefa:", error);
+    });
+}
+
+function saveColuna(BoardId, Name) {
+    // Lógica para salvar a coluna no backend (exemplo)
+    fetch(`${API_BASE_URL}/Column`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ BoardId, Name })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Coluna salva com sucesso:", data);
+    })
+    .catch(error => {
+        console.error("Erro ao salvar coluna:", error);
     });
 }
 
@@ -221,6 +249,24 @@ function loadUserName() {
         userNameSpan.textContent = "Usuário não identificado";
     }
 }
+
+// Seleciona o botão e adiciona um evento de clique
+const toggleButton = document.getElementById('themeToggle');
+
+function toggleTheme() {
+  // Alterna a classe 'dark-theme' no elemento <body>
+  const isDark = document.body.classList.contains('dark-theme');
+  document.body.classList.toggle('dark-theme');
+  
+  // Seleciona o ícone do botão e atualiza a classe
+  const themeIcon = document.getElementById('themeIcon');
+  themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon'; // Atualiza para o ícone correto
+}
+
+// Adiciona o evento ao botão
+toggleButton.addEventListener('click', toggleTheme);
+
+
 
 logoutButton.addEventListener("click", () => {
     localStorage.removeItem("user");

@@ -33,7 +33,7 @@
   border-radius: 10px;
   flex: 1;  
   width: 500px;
-  background-color: #005de8;  
+  background-color: #54ec99;  
 }
 
 .column-item {
@@ -80,4 +80,26 @@ body {
   border: 1px solid #ddd;
   margin-bottom: 5px;
   border-radius: 5px;
+}
+
+:root {
+  --bg-color: white;
+  --text-color: black;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.dark-theme {
+  --bg-color: black;
+  --text-color: white;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
 }

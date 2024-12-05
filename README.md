@@ -14,5 +14,3 @@ O principal objetivo desta aplicação é oferecer uma experiência prática par
 ## Funcionalidades
 
 - **Interface Interativa:** Utilização de HTML e CSS para construir a interface do Task Board e permitir a interação com os dados.
-
-- **Adicionado mais informações no arquivo taskBoard como a opção de criar Tasks (Tarefas)**
